@@ -1,26 +1,168 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  /* Cores base do sistema */
+  --color-background: #0a0a0a;
+  --color-surface: #111111;
+  --color-surface-2: #1a1a1a;
+  --color-border: rgba(255, 255, 255, 0.07);
+  --color-border-strong: rgba(255, 255, 255, 0.12);
+
+  /* Cores de marca */
+  --color-primary: #2ecc71;
+  --color-primary-dark: #001f21;
+  --color-primary-hover: #27ae60;
+  --color-primary-subtle: rgba(46, 204, 113, 0.1);
+
+  /* Cores de agentes */
+  --color-agent-acquisition: #3b82f6;
+  --color-agent-content: #8b5cf6;
+  --color-agent-sales: #10b981;
+
+  /* Texto */
+  --color-text-primary: rgba(255, 255, 255, 0.95);
+  --color-text-secondary: rgba(255, 255, 255, 0.55);
+  --color-text-muted: rgba(255, 255, 255, 0.3);
+
+  /* Tipografia */
+  --font-sans: "Urbanist", ui-sans-serif, system-ui, sans-serif;
+
+  /* Raios */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* Reset e base */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  height: 100%;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  min-height: 100%;
+  background-color: #0a0a0a;
+  color: rgba(255, 255, 255, 0.95);
+  font-family: "Urbanist", ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Scrollbar personalizada */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Seleção */
+::selection {
+  background-color: rgba(46, 204, 113, 0.25);
+  color: #fff;
+}
+
+/* Animações */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse-subtle {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.2s ease-out;
+}
+
+.animate-pulse-subtle {
+  animation: pulse-subtle 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Skeleton loading */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(255,255,255,0.04) 25%,
+    rgba(255,255,255,0.08) 50%,
+    rgba(255,255,255,0.04) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* Prose para respostas markdown dos agentes */
+.agent-prose {
+  line-height: 1.7;
+  color: rgba(255, 255, 255, 0.85);
+}
+.agent-prose h1,
+.agent-prose h2,
+.agent-prose h3 {
+  color: rgba(255, 255, 255, 0.95);
+  font-weight: 600;
+  margin-top: 1.25em;
+  margin-bottom: 0.5em;
+}
+.agent-prose h1 { font-size: 1.25rem; }
+.agent-prose h2 { font-size: 1.1rem; }
+.agent-prose h3 { font-size: 1rem; }
+.agent-prose p { margin-bottom: 0.875em; }
+.agent-prose ul,
+.agent-prose ol {
+  padding-left: 1.5em;
+  margin-bottom: 0.875em;
+}
+.agent-prose li { margin-bottom: 0.25em; }
+.agent-prose strong { color: rgba(255, 255, 255, 0.95); }
+.agent-prose code {
+  background: rgba(255, 255, 255, 0.08);
+  padding: 0.125em 0.375em;
+  border-radius: 4px;
+  font-size: 0.875em;
+  font-family: ui-monospace, monospace;
+}
+.agent-prose pre {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 1em;
+  overflow-x: auto;
+  margin-bottom: 1em;
+}
+.agent-prose pre code {
+  background: none;
+  padding: 0;
+  font-size: 0.85rem;
+}
+.agent-prose blockquote {
+  border-left: 3px solid #2ecc71;
+  padding-left: 1em;
+  color: rgba(255, 255, 255, 0.6);
+  margin: 1em 0;
+}
+.agent-prose hr {
+  border: none;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  margin: 1.5em 0;
 }
