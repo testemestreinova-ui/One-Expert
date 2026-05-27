@@ -12,7 +12,7 @@ interface Memory {
 export async function fetchMemories(
   workspaceId: string,
   agentType: AgentType,
-  limit = 12
+  limit = 30
 ): Promise<Memory[]> {
   const admin = createAdminClient() as any;
   const now = new Date().toISOString();
