@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getAnthropicClient, MODELS } from "@/lib/ai/claude";
 import { AGENT_PROMPTS } from "@/lib/ai/agents";
+import { fetchMemories, formatMemoriesForPrompt, extractAndSaveMemories } from "@/lib/ai/memory";
 import type { AgentType } from "@/types/database.types";
 
 export const runtime = "nodejs";
@@ -72,13 +73,16 @@ export async function POST(request: NextRequest) {
     convId = conv.id;
   }
 
-  // Busca histórico recente
-  const { data: history } = await db
-    .from("messages")
-    .select("role, content")
-    .eq("conversation_id", convId)
-    .order("created_at", { ascending: true })
-    .limit(30) as { data: Array<{ role: string; content: string }> | null };
+  // Busca histórico recente e memórias em paralelo
+  const [{ data: history }, memories] = await Promise.all([
+    db
+      .from("messages")
+      .select("role, content")
+      .eq("conversation_id", convId)
+      .order("created_at", { ascending: true })
+      .limit(30) as Promise<{ data: Array<{ role: string; content: string }> | null }>,
+    fetchMemories(workspaceId, agentType),
+  ]);
 
   // Salva mensagem do usuário
   await db.from("messages").insert({
@@ -86,6 +90,10 @@ export async function POST(request: NextRequest) {
     role: "user",
     content: message.trim(),
   });
+
+  // Injeta memórias no system prompt
+  const memoryContext = formatMemoriesForPrompt(memories);
+  const systemPrompt = AGENT_PROMPTS[agentType] + memoryContext;
 
   // Sem API key configurada — retorna aviso amigável
   if (!process.env.ANTHROPIC_API_KEY || process.env.ANTHROPIC_API_KEY.includes("sua_chave")) {
@@ -120,7 +128,7 @@ export async function POST(request: NextRequest) {
         const claudeStream = await anthropic.messages.create({
           model: MODELS.MAIN,
           max_tokens: 2048,
-          system: AGENT_PROMPTS[agentType],
+          system: systemPrompt,
           messages: [
             ...(history ?? []).map((m) => ({
               role: m.role as "user" | "assistant",
@@ -146,6 +154,14 @@ export async function POST(request: NextRequest) {
             role: "assistant",
             content: fullContent,
           });
+
+          // Extrai e salva memórias em background (não bloqueia o stream)
+          const fullHistory = [
+            ...(history ?? []),
+            { role: "user", content: message.trim() },
+            { role: "assistant", content: fullContent },
+          ];
+          extractAndSaveMemories(workspaceId, agentType, fullHistory).catch(() => {});
         }
 
         controller.enqueue(sse({ type: "done", conversationId: convId }));
